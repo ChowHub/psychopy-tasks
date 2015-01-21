@@ -145,13 +145,15 @@ class Buttons:
             for stim in range(len(stimList)):
                 if type(color) == str: stimList[stim].Rect.setFillColor(color)
                 else: stimList[stim].Rect.setFillColor(color[stim], 'rgb')
-        else: stimList.Rect.setFillColor(color)
+        else:
+            if type(color) == str: stimList.Rect.setFillColor(color)
+            else: stimList.Rect.setFillColor(color, 'rgb')
 
 class RecButtons(Buttons):    
-    def method(self, stim, stimNum):
+    def method(self, stim, stimNum, win):
         if stim.Text.text == "Clear":
             for entry in self.stimList[:-3]:
-                entry.Rect.setFillColor("gray")
+                entry.Rect.setFillColor(win.color, 'rgb')
                 entry.Text.text = "0"
                 entry.Text.setAutoDraw(False)
             self.respNum = 1

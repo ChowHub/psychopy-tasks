@@ -13,39 +13,37 @@ class gridPresent(Buttons):
         self.draw(drawText = False) 
         win.flip()
         core.wait(dur)
-        self.setFillColor(self.stimList[item], color="gray")
+        self.setFillColor(self.stimList[item], color=win.color)
     def update(self, item, gridRecall):
         """With each call track the squares that have been called in the current trial"""
         pass
         
 class gridRecall(RecButtons):
     def __call__(self, item, dur=2, **kwargs):
-        self.setAutoDraw(drawText=False)
-        for stim in self.stimList[-3:]:
+        self.setAutoDraw(drawText=False) #Display all squares w/o the text
+        for stim in self.stimList[-3:]: #Display text of the option squares (the final 3 in the stim list)
             stim.Text.setAutoDraw(True)
+        Prompt.setAutoDraw(True) #Show instructions, defined outside of this object
         win.flip()
         myMouse.clickReset()
         resps = []
         respsRT = []
-        while not self.done:
-            click, time = myMouse.getPressed(getTime=True)
+        while not self.done: #Loop until self.done --> when'submit' is pressed
+            click, time = myMouse.getPressed(getTime=True) #record type of click and time since last click
             if click[0] and time[0]:
-                x,y = myMouse.getPos()
-                sel = self.selButtons(x,y)
+                x,y = myMouse.getPos() #Get position of mouse (when its been clicked)
+                sel = self.selButtons(x,y) 
                 if sel:
-                    stim, stimLab = sel
+                    stim, stimLab = sel #stim = a wordbox objcet; stimLab = the name of button or the position in the grid
                     resps.append(stimLab)
-                    response = self.method(stim,self.respNum)
+                    response = self.method(stim,self.respNum, win) #Respond to mouse click
                     respsRT.append(time[0])
-                    self.draw(drawRect = True, drawText = None)
+                    self.draw(drawRect = True, drawText = None) #Display updated grid
                     win.flip()
                     myMouse.clickReset()
-                    #print response
-        """for stim in self.stimList[-3:]:
-            stim.Text.setAutoDraw(False)"""
-        #Prompt.setAutoDraw(False)
+        Prompt.setAutoDraw(False)
         self.reset()
-        return resps, respsRT
+        print resps, respsRT #TODO How to save this info
         
         
 
@@ -61,6 +59,8 @@ if __name__ == '__main__':
     df = DataFrame.from_csv('example/trials/spatial_span.csv')
     win = visual.Window([800,600],units="pix")
     myMouse = event.Mouse(win = win)
+    recPrompt = "Select the blocks in order.  Use the blank button to skip forgotten blocks."
+    Prompt = visual.TextStim(win, text =  recPrompt, pos = (0, 250), color = "black")
     Spos, Swdth, Shght, Stxt = genSpatialGrid(400*1.15,400,4,4)    #Create grid without options buttons
     P = gridPresent(win,
                     Spos, Swdth, Shght, Stxt,
