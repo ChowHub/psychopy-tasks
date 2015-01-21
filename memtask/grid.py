@@ -71,7 +71,7 @@ class Buttons:
     Draws N boxes with pos as top-left position, using WordBox class. Can check for mouse click within box, and respond with the
     function method().  All objects are stored as a list.
     """
-    def __init__(self, win, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs):
+    def __init__(self, win, prompt, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs):
         try:                                    #Ensure pos,wdth,hght,txt are iterable
             pos[0][0]
             self.pos = pos
@@ -91,6 +91,7 @@ class Buttons:
         elif type(txtKwargs) == list or type(txtKwargs) == tuple: self.txtKwargs = txtKwargs
         else: self.txtKwargs = [txtKwargs.copy() for entry in self.pos]
         self.win = win
+        self.prompt = prompt
         self.done = False
         self.stimList = []
         self.respNum = 1
