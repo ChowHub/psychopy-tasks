@@ -2,16 +2,23 @@ from psychopy import visual, core, event
 
 class ProcShow(object):
     def __init__(self, win, stim=None):
+        """Initialize with psychopy components needed"""
         self.stim = visual.TextStim(win=win) if not stim else stim
         self.clock = core.Clock()
         self.win = win
 
     def __call__(self, item, dur=2, **kwargs):
+        """Display item on screen for dur seconds.
+
+        Parameters:
+            item:   text to be presented on screen
+            dur :   length of time in seconds to present
+        """
         # load item into stim
         self.stim.text = item
         t = 0
         self.clock.reset()
-        while t < 2:
+        while t < dur:
             self.stim.draw()
             self.win.flip()
             t = self.clock.getTime()
@@ -70,6 +77,7 @@ class RecBox():
         self.__init__(**self.kwargs)
 
 def run_task(design, proc_dict):
+    """Loop through design, feeding each entry as kwargs to proc in mode column"""
     for row in design:
         proc = proc_dict[row['mode']]
         proc(**row)

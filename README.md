@@ -28,3 +28,31 @@ make tasks from them, then modifying tasks on the fly will be a snap.
 Task Design Example
 -------------------
 
+in   | item | mode | corr
+---- | ---- | ---- | ----
+0 | memory A | learn | 
+0 | dist A | dist | True
+0 | dist B | dist | True
+1 | memory B | learn | 
+1 | dist A | dist | False
+1 | dist B | dist | False
+2 | memory C | learn | 
+2 | dist A | dist | False
+2 | dist B | dist | True
+ |  | recall | 
+
+### Running
+Here, the `mode` column corresponds to the procedure that we'll be using.
+For each row in the data, the corresponding procedure will be called, with all
+the column data for that row passed as arguments.
+
+### Logging Data
+Ideally, each procedure should provide outputs that could easily be turned into a table.
+Thus, the `recall` procedure might return..
+
+pos | out
+--- | ---
+0   | memory A
+1   | memory B
+
+or something similar.
