@@ -2,12 +2,46 @@ from psychopy import core, event
 from components import Buttons
 
 class gridPresent(Buttons):
-    def __call__(self, item, dur=2, color_change = "red", **kwargs):
-        item = int(item) # item is a number indicating location on the grid
-        self.setFillColor(self.stimList[item], color=color_change) # change color of one of the squares
-        self.draw(drawText = False) 
-        self.win.flip()
-        core.wait(dur)
+
+    def __init__(self,win, prompt, pos, wdth, hght, txt, frame_dur=None, dur=2, color_change = "red",kwargsList = None, txtKwargs = None, **kwargs):
+        """
+        Parameters:
+            win: a visual.Window
+            prompt: optional TextStim that can be instructions, could be None
+            pos: list of positions for each cell
+            wdth: list of widths of each cell
+            hght: list of heights of each cell
+            txt: list of text inside each cell
+            frame_dur: (More precise method of dur) length of time grid is highlighted for this many frames, default is None, if specified, it supersedes dur
+            dur: length of time grid is highlighted in sec
+            color_change: the color the squares should change to
+            kwargsList: list of dictionary to be passed as kwargs to each Rect stim within WordBox
+            txtKwargs: list of dictionary to be passed as kwargs to each text stim within WordBox
+            kwargs: if kwargsList not given, kwargs is used instead
+        return: creates grid to be reused throughout, whenever it is is called
+        """
+        Buttons.__init__(self, win, prompt, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs)
+        self.frame_dur = frame_dur
+        self.dur = dur
+        self.color_change = color_change
+    def __call__(self, item,  **kwargs):
+        """
+        Parameters:
+            item:  a number indicating location on the grid (0:number of boxes-1)
+            dur: length of time grid is highlighted
+            kwargs:
+        return: Presents screen with one square highlighted
+        """
+        item = int(item) # change to int if item is read in as a string
+        self.setFillColor(self.stimList[item], color=self.color_change) # change color of one of the squares
+        if self.frame_dur: #if number of frames for presentation is specified
+            for frameN in range(self.frame_dur):
+                self.draw(drawText = False)
+            self.win.flip()
+        else:
+            self.draw(drawText = False)
+            self.win.flip()
+            core.wait(self.dur)
         self.setFillColor(self.stimList[item], color=self.win.color)
         
 class gridRecall(Buttons):
