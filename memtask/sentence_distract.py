@@ -1,20 +1,30 @@
-from psychopy import visual, core, event
+from psychopy import visual, event
+
+class CntrlDistractor(object):
+    def __init__(self):
+        self.correct = 0
+        self.total = 0
+
+    def update_score(self, corr_resp):
+        self.total += 1
+        if corr_resp: self.correct += 1
+        print self.total, self.correct
 
 class SentenceDistractor(object):
-    def __init__(self, win, test = None, stim=None):
+    def __init__(self, win, test = None, stim=None, controller=None):
         self.stim = visual.TextStim(win=win) if not stim else stim
         self.win = win
+        self.mouse = event.Mouse(win = self.win)
         self.test = test
-        self.tally = (0,0)
         self.instruct1 = visual.TextStim(win=self.win, text="Click mouse when ready to continue.", pos= (0,-100))
+        self.controller = controller
 
     def __call__(self, corr, item, **kwargs):
         """Takes item and corr, displays item,
         waits for a mouse click, and then asks whether it was True/False,
         verifies whether the response was correct"""
         self.stim.text = item
-        myMouse = event.Mouse(win = self.win)
-        click, time = myMouse.getPressed(getTime=True)
+        click, time = self.mouse.getPressed(getTime=True)
         while not click[0]:
             self.stim.draw()
             self.instruct1.draw()
@@ -27,35 +37,10 @@ class SentenceDistractor(object):
                 instruct.draw()
                 self.win.flip()
                 key_presses = event.waitKeys()
-            if corr:
-                if "t" in key_presses:
-                    print "Correct"
-                    self.track_score(True)
-                else:
-                    print "Incorrect"
-                    self.track_score(False)
-            else:
-                if "f" in key_presses:
-                    print "Correct"
-                    self.track_score(True)
-                else:
-                    print "Incorrect"
-                    self.track_score(False)
+            # Score Response
+            score_resp = corr == ("t" in key_presses)
+            print "Correct" if score_resp else "Incorrect"
+            if self.controller: self.controller.update_score(score_resp)
         else:
             self.test(corr)
-
-    def track_score(self, corr_resp):
-        correct, total = self.tally
-        if corr_resp:
-            correct += 1
-        total += 1
-        self.tally = (correct, total)
-        print self.tally
-
-
-
-
-
-
-
 
