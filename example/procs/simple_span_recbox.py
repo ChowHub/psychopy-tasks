@@ -1,6 +1,7 @@
 from psychopy import visual
 from pandas import DataFrame
-from memtask.proc import ProcShow, RecBoxMenu, run_task
+from memtask.ui.simple import ProcShow, RecBoxMenu
+from memtask.tools import run_task
 df = DataFrame.from_csv('example/trials/simple_span.csv')
 win = visual.Window([800,600])
 P = ProcShow(win)

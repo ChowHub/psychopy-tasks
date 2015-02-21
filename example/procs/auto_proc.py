@@ -1,6 +1,8 @@
 from pandas import DataFrame
-from memtask.proc import ProcShow, RecBox, run_task
-from psychopy import visual, core, event
+from memtask.ui.simple import ProcShow, RecBox
+from memtask.tools import run_task
+
+from psychopy import visual
 
 df = DataFrame.from_csv('example/trials/simple_span.csv')
 print df

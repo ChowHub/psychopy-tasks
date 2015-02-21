@@ -1,8 +1,9 @@
 from pandas import DataFrame
-from memtask.grid import genSpatialGrid
-from memtask.proc_grid import gridRecall, run_task
+from memtask.ui.grid import gridRecall
+from memtask.ui.components import genSpatialGrid
 from memtask.sentence_distract import SentenceDistractor
-from memtask.proc import ProcShow
+from memtask.ui.simple import ProcShow
+from memtask.tools import run_task
 from psychopy import visual
 
 df = DataFrame.from_csv('example/trials/complex_span.csv')

@@ -131,11 +131,3 @@ class RecBoxMenu(object):
                 ii -= 1
             else: 
                 ii += 1
-
-def run_task(design, proc_dict):
-    """Loop through design, feeding each entry as kwargs to proc in mode column"""
-    for row in design:
-        proc = proc_dict[row['mode']]
-        #args = getargspec(proc) if isclass
-        proc(**row)
-

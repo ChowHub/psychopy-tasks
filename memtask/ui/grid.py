@@ -1,5 +1,5 @@
 from psychopy import core, event
-from grid import Buttons
+from components import Buttons
 
 class gridPresent(Buttons):
     def __call__(self, item, dur=2, color_change = "red", **kwargs):
@@ -57,12 +57,3 @@ class gridRecall(Buttons):
             return stim, stimNum
         else: return None
         return stim, stim.Text.text
-        
-
-
-def run_task(design, proc_dict):
-    for row in design:
-        proc = proc_dict[row['mode']]
-        proc(**row)
-
-
