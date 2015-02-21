@@ -1,9 +1,5 @@
-from psychopy import visual, core, event
-from grid import genSpatialGrid, WordBox, Buttons, RecButtons
-#import os
-#os.chdir('..')
-
-
+from psychopy import core, event
+from grid import Buttons
 
 class gridPresent(Buttons):
     def __call__(self, item, dur=2, color_change = "red", **kwargs):
@@ -13,11 +9,8 @@ class gridPresent(Buttons):
         self.win.flip()
         core.wait(dur)
         self.setFillColor(self.stimList[item], color=self.win.color)
-    def update(self, item, gridRecall):
-        """With each call track the squares that have been called in the current trial"""
-        pass
         
-class gridRecall(RecButtons):
+class gridRecall(Buttons):
     def __call__(self, item, dur=2, **kwargs):
         myMouse = event.Mouse(win = self.win)
         self.setAutoDraw(drawText=False) #Display all squares w/o the text
@@ -45,6 +38,25 @@ class gridRecall(RecButtons):
         self.reset()
         print resps, respsRT #TODO How to save this info
         
+    def method(self, stim, stimNum, win):
+        if stim.Text.text == "Clear":
+            for entry in self.stimList[:-3]:
+                entry.Rect.setFillColor(win.color, 'rgb')
+                entry.Text.text = "0"
+                entry.Text.setAutoDraw(False)
+            self.respNum = 1
+        elif stim.Text.text == "Submit":
+            self.done = True
+        elif stim.Text.text == "Blank":
+            self.respNum += 1
+        elif stim.Text.text == "0":
+            stim.Rect.setFillColor("red")
+            stim.Text.setText(self.respNum)
+            stim.Text.setAutoDraw(True)
+            self.respNum += 1
+            return stim, stimNum
+        else: return None
+        return stim, stim.Text.text
         
 
 

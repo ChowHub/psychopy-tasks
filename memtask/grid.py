@@ -3,11 +3,30 @@ from psychopy import visual, core, event
 def genSpatialGrid(gridWdth, gridHght, nRow, nCol,
                    optWdth = None, optHght = None, optDist = None,
                    recHght = None, recWdth = None, letters = None, gridPos = (0,0)):
+    """Convenience function for calculating the parameters necessary to make a grid of buttons.
+
+    By default, cells will fit entire grid without spaces between them. If heights
+    and/or widths are specified, then cells will be evenly spaced, but retain those
+    dimensions.
+
+    parameters:
+        gridWdth:   overall width of grid
+        gridHght:   overall height of grid
+        nRow    :   number of rows in grid
+        nCol    :   number of columns in grid
+        optWdth :   width of option buttons
+        optHght :   height of option buttons
+        optDist :   Distance apart of option buttons
+        recWdth :   width of main cells
+        recHght :   height of main cells
+        letters :   boolean, should text be moved
+
+    TODO: refactor with function for doing calculations once, then use for width and height
+    """
+
     #wdths and hghts are not calculated using floating point
-    if recWdth: indWdth = recWdth
-    else: indWdth = gridWdth/nCol     #box width
-    if recHght: indHght = recHght
-    else: indHght = gridHght/nRow
+    indWdth = recWdth if recWdth else gridWdth/nCol    # no spaces if width not given
+    indHght = recHght if recHght else gridHght/nRow
     colSpace = (gridWdth - nCol * indWdth) / (nCol - 1) #0 if recWdth = None
     rowSpace = (gridHght - nRow * indHght) / (nRow - 1) #0 if recHght = None (no space between boxes)
     pos = []
@@ -70,8 +89,23 @@ class Buttons:
     """Generic class for selecting and interacting with rectangular objects.
     Draws N boxes with pos as top-left position, using WordBox class. Can check for mouse click within box, and respond with the
     function method().  All objects are stored as a list.
+
+    TODO: remove hard-coded in that if text is "0", then draw differently (was done for spatial span).
+          
     """
     def __init__(self, win, prompt, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs):
+        """
+        Parameters:
+            prompt:     unused?
+            pos:        list of positions for each cell
+            wdth:       list of widths of each cell
+            hght:       list of heights of each cell
+            txt:        list of text inside each cell
+            kwargsList: list of dictionary to be passed as kwargs to each Rect stim within WordBox
+            txtKwargs:  list of dictionary to be passed as kwargs to each text stim within WordBox
+            kwargs:     if kwargsList not given, kwargs is used instead
+
+        """
         try:                                    #Ensure pos,wdth,hght,txt are iterable
             pos[0][0]
             self.pos = pos
@@ -138,6 +172,7 @@ class Buttons:
 
     def setFillColor(self, stimList = None, color = "black"):
         '''Sets fill color for a list or single stimulus from stimList.
+
         Sets all black by default.
         '''
         if not stimList:
@@ -149,24 +184,3 @@ class Buttons:
         else:
             if type(color) == str: stimList.Rect.setFillColor(color)
             else: stimList.Rect.setFillColor(color, 'rgb')
-
-class RecButtons(Buttons):    
-    def method(self, stim, stimNum, win):
-        if stim.Text.text == "Clear":
-            for entry in self.stimList[:-3]:
-                entry.Rect.setFillColor(win.color, 'rgb')
-                entry.Text.text = "0"
-                entry.Text.setAutoDraw(False)
-            self.respNum = 1
-        elif stim.Text.text == "Submit":
-            self.done = True
-        elif stim.Text.text == "Blank":
-            self.respNum += 1
-        elif stim.Text.text == "0":
-            stim.Rect.setFillColor("red")
-            stim.Text.setText(self.respNum)
-            stim.Text.setAutoDraw(True)
-            self.respNum += 1
-            return stim, stimNum
-        else: return None
-        return stim, stim.Text.text
