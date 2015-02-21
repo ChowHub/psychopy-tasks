@@ -1,9 +1,9 @@
 from pandas import DataFrame
-from memtask.grid import genSpatialGrid, WordBox, Buttons, RecButtons
-from memtask.proc_grid import gridPresent, gridRecall, run_task
+from memtask.grid import genSpatialGrid
+from memtask.proc_grid import gridRecall, run_task
 from memtask.sentence_distract import SentenceDistractor
 from memtask.proc import ProcShow
-from psychopy import visual, core, event
+from psychopy import visual
 
 df = DataFrame.from_csv('example/trials/complex_span.csv')
 win = visual.Window([800,600],units="pix")
