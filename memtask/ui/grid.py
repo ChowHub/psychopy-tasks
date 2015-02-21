@@ -45,20 +45,44 @@ class gridPresent(Buttons):
         self.setFillColor(self.stimList[item], color=self.win.color)
         
 class gridRecall(Buttons):
-    def __call__(self, item, dur=2, **kwargs):
-        myMouse = event.Mouse(win = self.win)
+     def __init__(self,win, prompt, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs):
+        """
+        Parameters:
+            win: a visual.Window
+            prompt: optional TextStim that can be instructions, could be None
+            pos: list of positions for each cell
+            wdth: list of widths of each cell
+            hght: list of heights of each cell
+            txt: list of text inside each cell
+            frame_dur: (More precise method of dur) length of time grid is highlighted for this many frames, default is None, if specified, it supersedes dur
+            dur: length of time grid is highlighted in sec
+            color_change: the color the squares should change to
+            kwargsList: list of dictionary to be passed as kwargs to each Rect stim within WordBox
+            txtKwargs: list of dictionary to be passed as kwargs to each text stim within WordBox
+            kwargs: if kwargsList not given, kwargs is used instead
+        return: creates grid to be reused throughout, whenever it is is called
+        """
+        Buttons.__init__(self, win, prompt, pos, wdth, hght, txt, kwargsList = None, txtKwargs = None, **kwargs)
+        self.myMouse = event.Mouse(win=win)
+
+     def __call__(self, **kwargs):
+        """
+        Parameters:
+            kwargs: Absorb whatever params are inputed
+        return: Display and Record a Recall Grid
+        """
         self.setAutoDraw(drawText=False) #Display all squares w/o the text
         for stim in self.stimList[-3:]: #Display text of the option squares (the final 3 in the stim list)
             stim.Text.setAutoDraw(True)
         self.prompt.setAutoDraw(True) #Show instructions, defined outside of this object
         self.win.flip()
-        myMouse.clickReset()
+        self.myMouse.clickReset()
         resps = []
         respsRT = []
         while not self.done: #Loop until self.done --> when'submit' is pressed
-            click, time = myMouse.getPressed(getTime=True) #record type of click and time since last click
+            click, time = self.myMouse.getPressed(getTime=True) #record type of click and time since last click
             if click[0] and time[0]:
-                x,y = myMouse.getPos() #Get position of mouse (when its been clicked)
+                x,y = self.myMouse.getPos() #Get position of mouse (when its been clicked)
                 sel = self.selButtons(x,y) 
                 if sel:
                     stim, stimLab = sel #stim = a wordbox objcet; stimLab = the name of button or the position in the grid
@@ -67,12 +91,12 @@ class gridRecall(Buttons):
                     respsRT.append(time[0])
                     self.draw(drawRect = True, drawText = None) #Display updated grid
                     self.win.flip()
-                    myMouse.clickReset()
+                    self.myMouse.clickReset()
         self.prompt.setAutoDraw(False)
         self.reset()
         print resps, respsRT #TODO How to save this info
         
-    def method(self, stim, stimNum, win):
+     def method(self, stim, stimNum, win):
         if stim.Text.text == "Clear":
             for entry in self.stimList[:-3]:
                 entry.Rect.setFillColor(win.color, 'rgb')
