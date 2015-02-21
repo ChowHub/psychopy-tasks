@@ -1,35 +1,72 @@
 from psychopy import visual, core, event
+from memtask.tools import fixKeys
 
 class ProcShow(object):
+    """Procedure for displaying a psychopy stim object for either..
+        (1) some duration of time
+        (2) until a the mouse is clicked
+    """
     def __init__(self, win, stim=None):
         """Initialize with psychopy components needed"""
         self.stim = visual.TextStim(win=win) if not stim else stim
         self.clock = core.Clock()
         self.win = win
+        self.mouse = event.Mouse(win = win)
 
-    def __call__(self, item, dur=2, **kwargs):
-        """Display item on screen for dur seconds.
+    def __call__(self, item, dur=None, **kwargs):
+        """Display item on screen for dur seconds or until mouseclick.
 
         Parameters:
             item:   text to be presented on screen
-            dur :   length of time in seconds to present
+            dur :   length of time in seconds to present. If False waits for mouse click.
         """
         # load item into stim
         self.stim.text = item
         t = 0
         self.clock.reset()
-        while t < dur:
-            self.stim.draw()
-            self.win.flip()
-            t = self.clock.getTime()
+        if dur: 
+            while t < dur:
+                self.stim.draw()
+                self.win.flip()
+                t = self.clock.getTime()
+        else:
+            click, time = self.mouse.getPressed(getTime=True)
+            while not click[0]:
+                self.stim.draw()
+                self.win.flip()
 
-def fixKeys(string, filt=True):
-    """Put strings over 1 char long in bracks (e.g. tab -> {tab}). If filt is 
-    True, return empty string if over 1 char."""
-    if type(string)==list: string = string[0]
-    if len(string) <= 1: return string
-    elif filt: return ''
-    else: return '{' + string + '}'
+class ProcVer(object):
+    """Procedure for prompting the user to click a button"""
+    def __init__(self, win, myMouse, TxtStim, VerScreen):
+        """Initialize with psychopy stims.
+
+        Parameters:
+            TxtStim  :  psychopy text stim object
+            VerScreen:  memtask.Button object
+        """
+        self.win, self.myMouse, self.TxtStim, self.VerScreen = win, myMouse, TxtStim, VerScreen
+
+    def __call__(self, ans_probe):
+        return self.proc(self.win, self.myMouse, ans_probe, self.TxtStim, self.VerScreen)
+
+    @staticmethod
+    def proc(win, myMouse, ans_probe, TxtStim, VerScreen):
+        TxtStim.setText(ans_probe)
+        TxtStim.draw()
+        VerScreen.draw()
+        win.flip()
+        myMouse.clickReset()                                        #TODO: replace with waitscreen
+        lastTime = myMouse.getPressed(getTime = True)[1][0]
+        ans = None
+        while not VerScreen.done:
+            click, time = myMouse.getPressed(getTime=True)
+            if click[0] and time[0] != lastTime:
+                x,y = myMouse.getPos()
+                ans = VerScreen.selButtons(x,y)
+                lastTime = time[0]
+        VerScreen.reset()
+        #return ans == "True", lastTime
+
 
 class RecBox():
     def __init__(self, win, pos):
@@ -48,8 +85,8 @@ class RecBox():
 
         ans = self.ans
         suf = "_"
+        new = [""]
         while True:
-            new = event.waitKeys()
             print new
             if new[0] in exitkeys: break
             elif new[0] == 'backspace':
@@ -58,16 +95,13 @@ class RecBox():
             self.stims['resp'].setText("".join(ans) + suf)
             self.stims['resp'].draw()
             self.win.flip()
+            new = event.waitKeys()
         #remove suffix
         self.stims['resp'].setText("".join(ans))
         self.win.flip()
 
         self.ans = ans
         return new[0]
-
-    def set(self, method, val):
-        for stim in self.stims.values():
-            getattr(stim, method)(val)
 
     def reset(self):
         """Reset class.  Reinitializes, so may produce unexpected behavior if referencing stim
@@ -76,20 +110,32 @@ class RecBox():
         """
         self.__init__(**self.kwargs)
 
+    def draw(self):
+        for stim in self.stims.values(): stim.draw()
+
+    def setAutoDraw(self, val):
+        for stim in self.stims.values(): stim.setAutoDraw(val)
+
+
+class RecBoxMenu(object):
+    def __init__(self, win, N):
+        self.fields = [RecBox(win, [0, -hght / 3.]) for hght in range(N)]
+
+    def __call__(self, **kwargs):
+        for field in self.fields: field.setAutoDraw(True)
+        ii = 0
+        while ii < len(self.fields):
+            field = self.fields[ii]
+            exitkey = field(exitkeys=['return', 'up', 'down'])
+            if exitkey == 'up' and ii != 0: 
+                ii -= 1
+            else: 
+                ii += 1
+
 def run_task(design, proc_dict):
     """Loop through design, feeding each entry as kwargs to proc in mode column"""
     for row in design:
         proc = proc_dict[row['mode']]
+        #args = getargspec(proc) if isclass
         proc(**row)
 
-if __name__ == '__main__':
-    from pandas import DataFrame
-    df = DataFrame.from_csv('example/trials/simple_span.csv')
-    win = visual.Window([800,600])
-    P = ProcShow(win)
-    R = RecBox(win, pos = [0, 0])
-    proc_dict = {'learn': P,
-                 'recall': R
-                 }
-
-    run_task([row for ii, row in df.iterrows()], proc_dict)
